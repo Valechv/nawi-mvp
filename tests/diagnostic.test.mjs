@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {explainLead,buildDiagnostic} from '../lib/diagnostic.ts';
+const now=new Date('2026-11-19T14:00:00Z');
+const base={id:'1',organization_id:'o',name:'Lead',phone:null,email:null,source:'WhatsApp',service:'Curso',status:'Nuevo',intent:'Sin información',urgency:'Desconocida',last_contacted_at:null,next_follow_up_at:null,created_at:'2026-11-19T12:00:00Z',updated_at:'2026-11-19T12:00:00Z',notes:'Hola',value_estimate:null,assigned_to:null};
+test('Hola permanece por calificar, sin inferir intención',()=>{const r=explainLead(base,now); assert.equal(r.group,'calificar');assert.ok(!r.reason.includes('compra'));});
+test('Cotización es atención, con evidencia estructurada',()=>{const r=explainLead({...base,status:'Cotización'},now);assert.equal(r.group,'atender');assert.ok(r.evidence.some(x=>x.message.includes('cotización')));});
+test('Seguimiento vencido crea categoría recuperar sin afirmar venta',()=>{const r=explainLead({...base,status:'Seguimiento',last_contacted_at:'2026-11-18T12:00:00Z',next_follow_up_at:'2026-11-18T15:00:00Z'},now);assert.equal(r.group,'recuperar');});
+test('Fecha futura se categoriza programado',()=>{const r=explainLead({...base,status:'Contactado',last_contacted_at:'2026-11-19T13:00:00Z',next_follow_up_at:'2026-11-20T15:00:00Z'},now);assert.equal(r.group,'programados');});
+test('No interesado se excluye',()=>{const r=explainLead({...base,intent:'No interesado'},now);assert.equal(r.group,'sin_accion');assert.equal(buildDiagnostic([{...base,intent:'No interesado'}],now).active,0);});
+test('Métricas son descriptivas, sin falsos recuperados',()=>{const x=buildDiagnostic([base,{...base,id:'2',status:'Ganado',last_contacted_at:'2026-11-19T13:00:00Z'}],now);assert.equal(x.total,2);assert.equal(x.wins,1);assert.equal(x.noContact,1);});
