@@ -1,0 +1,3 @@
+nombre,telefono,correo,servicio,estado,intencion,urgencia,observaciones
+María Prueba,999000001,maria.demo@example.com,Power BI,Nuevo,Sin información,Desconocida,Escribió hola y todavía no indicó qué desea
+Luis Prueba,999000002,luis.demo@example.com,Python,Cotización,Precio o cotización,Este mes,Solicitó información comercial y cotización
