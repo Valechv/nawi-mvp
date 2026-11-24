@@ -113,3 +113,14 @@ Conectar WhatsApp Cloud API con un número de prueba y webhooks verificados; lue
 Se revisaron los archivos y se aplicaron comprobaciones estáticas. **No se ha podido completar `npm install`, `npm run build` ni una prueba contra una instancia real de Supabase en este entorno**, así que el primer despliegue requiere validar el resultado y, si aparece un error de build, compartir el log para corregirlo.
 
 **Importante:** la aplicación no crea recordatorios programados ni contacta clientes automáticamente: muestra vencimientos y permite generar tareas. No se debe prometer un bot real hasta conectar WhatsApp Cloud API.
+
+
+## Actualización v1.2 sobre Nawi ya desplegado
+
+**No vuelvas a ejecutar `schema.sql` ni crees un proyecto nuevo.** En el Supabase actual entra a SQL Editor y ejecuta `supabase/migrations/002_auto_tasks.sql` una sola vez (es reejecutable). Después actualiza los archivos en el mismo repositorio GitHub `main`; Vercel realiza un despliegue nuevo, manteniendo la URL y los datos.
+
+**Qué aporta:** al abrir una empresa, Nawi sincroniza tareas automáticas para leads nuevos sin primer contacto y seguimientos vencidos; evita duplicados por tipo de tarea; al cerrar un lead completa las tareas automáticas. La tarea vencida se recalcula **cuando se abre/actualiza el panel**, no mediante un proceso perpetuo en segundo plano. La importación CSV conserva notas, intención, urgencia y estado si la base incluye esas columnas; omite duplicados evidentes por email o teléfono respecto de las primeras 1.000 filas cargadas en pantalla. No interpreta chats con IA todavía.
+
+**Para Excel:** exportar como `CSV UTF-8` antes de importar. **Prueba:** crear un lead nuevo, volver al Resumen y comprobar una tarea pendiente. Después crear un lead con seguimiento vencido, abrir Resumen y comprobar su tarea. Confirmar que refrescar no duplica tareas.
+
+**Seguridad:** no importar datos personales reales ni mensajes sensibles antes de validar consentimiento, políticas RLS, retención y roles. Gmail/WhatsApp/Claude requieren integraciones autorizadas posteriores.

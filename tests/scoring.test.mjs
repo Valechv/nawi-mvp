@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {priority,commercial} from '../lib/scoring.ts';
+const sample={id:'1',organization_id:'o',name:'Lead',phone:'51999999999',email:null,source:'WhatsApp',service:null,status:'Nuevo',intent:'Sin información',urgency:'Desconocida',last_contacted_at:null,next_follow_up_at:null,created_at:'2026-11-18T10:00:00Z',updated_at:'2026-11-18T10:00:00Z',notes:'Hola',value_estimate:null,assigned_to:null};
+const now=new Date('2026-11-18T14:00:00Z');
+test('Hola genera prioridad de atención sin inventar potencial',()=>{assert.equal(commercial(sample).score,null);assert.equal(priority(sample,now).action,'Contactar y calificar');});
+test('Compra explícita y urgencia incrementan prioridad',()=>{assert.ok(priority({...sample,intent:'Compra explícita',urgency:'Inmediata'},now).score>priority(sample,now).score)});
+test('Lead cerrado no recibe seguimiento',()=>{assert.equal(priority({...sample,status:'Ganado',next_follow_up_at:'2026-11-01T00:00:00Z'},now).score,0)});
+test('No interesado no se reactiva aunque tenga seguimiento vencido',()=>{assert.equal(priority({...sample,intent:'No interesado',next_follow_up_at:'2026-11-01T00:00:00Z'},now).score,0)});
+test('El potencial experimental no se presenta con información incompleta',()=>{assert.equal(commercial({...sample,intent:'Precio o cotización'}).score,null)});

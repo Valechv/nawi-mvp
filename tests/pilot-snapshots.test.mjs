@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const f=fs.readFileSync(new URL('../lib/report-templates.ts',import.meta.url),'utf8');
+const ui=fs.readFileSync(new URL('../components/NawiApp.tsx',import.meta.url),'utf8');
+const mig=fs.readFileSync(new URL('../supabase/migrations/006_pilot_evidence_v20.sql',import.meta.url),'utf8');
+test('Levo comparison sample and median values are explicitly stored',()=>{for(const s of ['beforeCount:75','duringCount:88','beforeMedianHours:9.5','duringMedianHours:4.65','beforeWithin24Pct:68','duringWithin24Pct:72.7'])assert.ok(f.includes(s),s)});
+test('Mente historical data is labeled as pre-Nawi',()=>{for(const s of ['historicalLeads:585','historicalContacted:210','historicalInterested:134','historicalSales:51','No son resultados','NO resultados logrados por Nawi'])assert.ok((f+ui).includes(s),s)});
+test('Snapshots are persisted in published reports with migration',()=>{assert.ok(mig.includes('pilot_snapshot jsonb'));assert.ok(ui.includes('pilot_snapshot:'));assert.ok(ui.includes('selected.pilot_snapshot&&<PilotEvidence'));});
+test('Client visibility remains bound to published reports',()=>{assert.ok(ui.includes("(isAdmin||r.status==='publicado')"));assert.ok(ui.includes('isAdmin?referenceSnapshot:null'))});
